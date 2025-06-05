@@ -1,3 +1,4 @@
+import '@opentelemetry/auto-instrumentations-node/register'
 import '../rabbitmq/subscriber.ts'
 
 import fastifyCors from '@fastify/cors'
