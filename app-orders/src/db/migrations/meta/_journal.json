@@ -8,6 +8,13 @@
       "when": 1749085499218,
       "tag": "0000_lumpy_thaddeus_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749088502369,
+      "tag": "0001_condemned_cassandra_nova",
+      "breakpoints": true
     }
   ]
 }
