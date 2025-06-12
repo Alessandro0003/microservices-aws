@@ -3,7 +3,7 @@ import * as awsx from "@pulumi/awsx";
 import * as docker from "@pulumi/docker-build";
 import * as pulumi from "@pulumi/pulumi";
 
-const ordersECRRepository = new awsx.ecr.Repository('orders-ecr', {
+const ordersECRRepository = new awsx.ecr.Repository('orders-ecr-app', {
   forceDelete: true,
 })
 
@@ -11,7 +11,7 @@ const ordersECRToken = aws.ecr.getAuthorizationTokenOutput({
   registryId: ordersECRRepository.repository.registryId,
 })
 
-export const ordersDockerImage = new docker.Image('orders-image', {
+export const ordersDockerImage = new docker.Image('orders-image-app', {
   tags: [
     pulumi.interpolate`${ordersECRRepository.repository.repositoryUrl}:latest`
   ],
