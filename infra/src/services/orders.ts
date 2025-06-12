@@ -2,7 +2,7 @@ import * as awsx from '@pulumi/awsx';
 import { cluster } from '../cluster';
 import { ordersDockerImage } from '../images/orders';
 
-export const ordersService = new awsx.classic.ecs.FargateService('fargete-orders', {
+export const ordersService = new awsx.classic.ecs.FargateService('fargete-orders-app', {
   cluster,
   desiredCount: 1,
   waitForSteadyState: false,
