@@ -11,7 +11,7 @@ const rabbitMQAdminTargetGroup = appLoadBalancer.createTargetGroup('rabbitmq-adm
   }
 })
 
-const rabbitMQAdminHttpListeners = appLoadBalancer.createListener('rabbitmq-admin-listeners', {
+export const rabbitMQAdminHttpListeners = appLoadBalancer.createListener('rabbitmq-admin-listeners', {
   port: 15672,
   protocol: 'HTTP',
   targetGroup: rabbitMQAdminTargetGroup
