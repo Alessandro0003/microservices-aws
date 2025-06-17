@@ -1,13 +1,12 @@
-import * as awsx from '@pulumi/awsx';
+import * as awsx from "@pulumi/awsx";
 import * as pulumi from '@pulumi/pulumi';
-import { cluster } from '../cluster';
-import { ordersDockerImage } from '../images/orders';
-import { appLoadBalancer } from '../load-balancer';
+import { cluster } from "../cluster";
+import { invoicesDockerImage } from "../images/invoices";
+import { appLoadBalancer } from "../load-balancer";
 import { amqpListeners } from './rabbitmq';
 
-
-const ordersTargetGroup = appLoadBalancer.createTargetGroup('orders-target', {
-  port: 3333,
+const invoicesTargetGroup = appLoadBalancer.createTargetGroup('invoices-target', {
+  port: 3334,
   protocol: 'HTTP',
   healthCheck: {
     path: '/health',
@@ -15,24 +14,23 @@ const ordersTargetGroup = appLoadBalancer.createTargetGroup('orders-target', {
   }
 })
 
-export const ordersHttpListeners = appLoadBalancer.createListener('orders-listeners', {
-  port: 3333,
+export const invoicesHttpListeners = appLoadBalancer.createListener('invoices-listeners', {
+  port: 3334,
   protocol: 'HTTP',
-  targetGroup: ordersTargetGroup
+  targetGroup: invoicesTargetGroup
 })
 
-
-export const ordersService = new awsx.classic.ecs.FargateService('fargete-orders-app', {
+export const invoicesService = new awsx.classic.ecs.FargateService('fargate-invoices-app', {
   cluster,
   desiredCount: 1,
   waitForSteadyState: false,
   taskDefinitionArgs: {
     container: {
-      image: ordersDockerImage.ref,
+      image: invoicesDockerImage.ref,
       cpu: 256,
       memory: 512,
       portMappings: [
-        ordersHttpListeners
+        invoicesHttpListeners
       ],
       environment: [
         {
@@ -41,7 +39,7 @@ export const ordersService = new awsx.classic.ecs.FargateService('fargete-orders
         },
         {
           name: 'DATABASE_URL',
-          value: 'postgresql://orders_owner:npg_cDlpFG1i8sQJ@ep-fragrant-firefly-a458ofhg.us-east-1.aws.neon.tech/orders?sslmode=require'
+          value: 'postgresql://invoices_owner:npg_0ya1EVzGRBpr@ep-round-recipe-a4ne1un5.us-east-1.aws.neon.tech/invoices?sslmode=require'
         },
         {
           name: "OTEL_TRACES_EXPORTER",
@@ -57,9 +55,9 @@ export const ordersService = new awsx.classic.ecs.FargateService('fargete-orders
         },
         {
           name: "OTEL_SERVICE_NAME",
-          value: "orders"
+          value: "invoices"
         },
-        {
+         {
           name: "OTEL_RESOURCE_ATTRIBUTES",
           value: "service.name=my-app,service.namespace=my-application-group,deployment.environment=production"
         },
