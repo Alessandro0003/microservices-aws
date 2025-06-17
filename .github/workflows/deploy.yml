@@ -1,4 +1,4 @@
-name: Deploy API
+name: Deploy Monorepo
 
 on:
   push:
@@ -6,19 +6,22 @@ on:
       - main
 
 jobs:
-  deploy:
-    name: Deploy to production
+
+  # 🔧 Deploy da Infraestrutura com Pulumi
+  deploy-infra:
+    name: Deploy Infraestrutura
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: 'npm'
+          cache-dependency-path: 'infra/package-lock.json'
 
       - name: Install dependencies
         working-directory: ./infra
@@ -31,7 +34,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - uses: pulumi/actions@v6
+      - name: Deploy Infra with Pulumi
+        uses: pulumi/actions@v6
         with:
           command: up
           work-dir: ./infra
@@ -39,3 +43,53 @@ jobs:
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           PULUMI_CONFIG_PASSPHRASE: ""
+
+  # 🚀 Deploy App Orders
+  deploy-app-orders:
+    name: Deploy App Orders
+    runs-on: ubuntu-latest
+    needs: deploy-infra
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'app-orders/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./app-orders
+        run: npm install --frozen-lockfile
+
+      - name: Build Docker Image
+        working-directory: ./app-orders
+        run: docker build -t app-orders .
+
+  # 🚀 Deploy App Invoices
+  deploy-app-invoices:
+    name: Deploy App Invoices
+    runs-on: ubuntu-latest
+    needs: deploy-infra
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'app-invoices/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./app-invoices
+        run: npm install --frozen-lockfile
+
+      - name: Build Docker Image
+        working-directory: ./app-invoices
+        run: docker build -t app-invoices .
